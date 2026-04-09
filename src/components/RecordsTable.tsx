@@ -1,5 +1,6 @@
 import { TermografiaRecord } from '@/types'
 import FaseBadge from './FaseBadge'
+import * as XLSX from 'xlsx'
 
 interface RecordsTableProps {
   records: TermografiaRecord[]
@@ -14,6 +15,33 @@ interface RecordsTableProps {
 export default function RecordsTable({
   records, total, searchTerm, onSearchChange, onView, onEdit, onDelete,
 }: RecordsTableProps) {
+  const exportToExcel = () => {
+    if (records.length === 0) {
+      alert('Nenhum registro para exportar.')
+      return
+    }
+
+    // Mapear campos para as colunas desejadas
+    const data = records.map((r) => ({
+      Fase: r.fase || '',
+      Empresa: r.empresa || '',
+      Data: r.data || '',
+      Setor: r.setor || '',
+      Tag: r.tag || '',
+      Equipamento: r.equipamento || '',
+      Termograma: r.termograma || '',
+      Falha: r.descricao || '',
+      Foto: r.foto || '',
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Registros')
+    
+    // Gerar arquivo e fazer download
+    XLSX.writeFile(wb, `termografia_${new Date().toISOString().slice(0,19)}.xlsx`)
+  }
+
   return (
     <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
       {/* Header */}
@@ -21,16 +49,24 @@ export default function RecordsTable({
         <span className="text-sm font-medium text-gray-700">
           {records.length === total ? `${total} registros` : `${records.length} de ${total} registros`}
         </span>
-        <input
-          type="text"
-          placeholder="Buscar..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-1.5 text-sm text-gray-800 w-48 focus:outline-none focus:border-brand"
-        />
+        <div className="flex gap-2">
+          <button
+            onClick={exportToExcel}
+            className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-green-100 transition-colors"
+          >
+            📎 Exportar Excel
+          </button>
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="border border-gray-200 bg-gray-50 rounded-lg px-3 py-1.5 text-sm text-gray-800 w-48 focus:outline-none focus:border-brand"
+          />
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Table (restante do código permanece igual) */}
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
