@@ -24,7 +24,6 @@ function convertToDDMMYYYY(dateString: string): string {
 // Função para converter DD-MM-YYYY para YYYY-MM-DD (para exibir no input date)
 function convertToYYYYMMDD(dateString: string): string {
   if (!dateString) return ''
-  // Se estiver no formato DD-MM-YYYY
   if (dateString.includes('-') && dateString.split('-')[0].length === 2) {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
@@ -50,7 +49,6 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
     if (record) {
       const { id, createdAt, updatedAt, ...rest } = record
       setForm(rest)
-      // Converte a data do registro (DD-MM-YYYY) para YYYY-MM-DD para o input
       if (rest.data) {
         setDateValue(convertToYYYYMMDD(rest.data))
       }
@@ -61,25 +59,31 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
     }
   }, [record])
 
-  const set = (field: keyof TermografiaFormData, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }))
+  // Função auxiliar para atualizar campo com conversão para uppercase (exceto data e fase)
+  const setField = (field: keyof TermografiaFormData, value: string) => {
+    // Aplica uppercase para todos os campos de texto
+    const upperFields: (keyof TermografiaFormData)[] = [
+      'empresa', 'setor', 'tag', 'equipamento', 
+      'termograma', 'foto', 'descricao'
+    ]
+    const finalValue = upperFields.includes(field) ? value.toUpperCase() : value
+    setForm((prev) => ({ ...prev, [field]: finalValue }))
+  }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const yyyymmdd = e.target.value
     setDateValue(yyyymmdd)
-    // Converte para DD-MM-YYYY ao salvar no form
-    set('data', convertToDDMMYYYY(yyyymmdd))
+    setField('data', convertToDDMMYYYY(yyyymmdd))
   }
 
   const handleSubmit = async () => {
     if (!form.empresa.trim()) { alert('Informe o nome da empresa.'); return }
     setSaving(true)
-    try { 
-      // form.data já está no formato DD-MM-YYYY
-      await onSave(form) 
-      onClose() 
-    } finally { 
-      setSaving(false) 
+    try {
+      await onSave(form)
+      onClose()
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -101,42 +105,72 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           {/* Empresa */}
           <div className="col-span-2 flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Empresa *</label>
-            <input className="input" value={form.empresa} onChange={(e) => set('empresa', e.target.value)} placeholder="Nome da empresa" />
+            <input
+              className="input"
+              value={form.empresa}
+              onChange={(e) => setField('empresa', e.target.value)}
+              placeholder="Nome da empresa"
+            />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Data</label>
-            <input 
-              type="date" 
-              className="input" 
-              value={dateValue} 
+            <input
+              type="date"
+              className="input"
+              value={dateValue}
               onChange={handleDateChange}
             />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Setor</label>
-            <input className="input" value={form.setor} onChange={(e) => set('setor', e.target.value)} placeholder="Setor/área" />
+            <input
+              className="input"
+              value={form.setor}
+              onChange={(e) => setField('setor', e.target.value)}
+              placeholder="Setor/área"
+            />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Tag</label>
-            <input className="input" value={form.tag} onChange={(e) => set('tag', e.target.value)} placeholder="TAG do ativo" />
+            <input
+              className="input"
+              value={form.tag}
+              onChange={(e) => setField('tag', e.target.value)}
+              placeholder="TAG do ativo"
+            />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Equipamento</label>
-            <input className="input" value={form.equipamento} onChange={(e) => set('equipamento', e.target.value)} placeholder="Nome do equipamento" />
+            <input
+              className="input"
+              value={form.equipamento}
+              onChange={(e) => setField('equipamento', e.target.value)}
+              placeholder="Nome do equipamento"
+            />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Termograma</label>
-            <input className="input" value={form.termograma} onChange={(e) => set('termograma', e.target.value)} placeholder="Nº ou referência" />
+            <input
+              className="input"
+              value={form.termograma}
+              onChange={(e) => setField('termograma', e.target.value)}
+              placeholder="Nº ou referência"
+            />
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Referência da foto</label>
-            <input className="input" value={form.foto} onChange={(e) => set('foto', e.target.value)} placeholder="Ref. foto" />
+            <input
+              className="input"
+              value={form.foto}
+              onChange={(e) => setField('foto', e.target.value)}
+              placeholder="Ref. foto"
+            />
           </div>
 
           {/* Fase */}
@@ -144,7 +178,13 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
             <label className="text-xs text-gray-500 font-medium">Fase</label>
             <div className="flex gap-2">
               {(['R', 'S', 'T'] as Fase[]).map((f) => (
-                <button key={f} className={faseBtnClass(f)} onClick={() => set('fase', form.fase === f ? '' : f)}>{f}</button>
+                <button
+                  key={f}
+                  className={faseBtnClass(f)}
+                  onClick={() => setField('fase', form.fase === f ? '' : f)}
+                >
+                  {f}
+                </button>
               ))}
             </div>
           </div>
@@ -152,7 +192,12 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           {/* Descrição */}
           <div className="col-span-2 flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Descrição da falha</label>
-            <textarea className="input resize-y min-h-[72px]" value={form.descricao} onChange={(e) => set('descricao', e.target.value)} placeholder="Descreva a falha identificada..." />
+            <textarea
+              className="input resize-y min-h-[72px]"
+              value={form.descricao}
+              onChange={(e) => setField('descricao', e.target.value)}
+              placeholder="Descreva a falha identificada..."
+            />
           </div>
         </div>
 

@@ -14,6 +14,7 @@ interface UseTermografiaReturn {
   createRecord: (data: TermografiaFormData) => Promise<void>
   updateRecord: (id: string, data: TermografiaFormData) => Promise<void>
   deleteRecord: (id: string) => Promise<void>
+  importRecords: (newRecords: TermografiaRecord[]) => Promise<void>
   refresh: () => Promise<void>
 }
 
@@ -55,5 +56,32 @@ export function useTermografia(): UseTermografiaReturn {
     await refresh()
   }
 
-  return { records, filtered, loading, searchTerm, storageInfo, setSearchTerm, createRecord, updateRecord, deleteRecord, refresh }
+  const importRecords = async (newRecords: TermografiaRecord[]) => {
+    // Se o storageAdapter tiver um método createMany, use-o.
+    // Caso contrário, faça um loop com create.
+    // Aqui assumimos que o adapter tem createMany (mais eficiente)
+    if ((storageAdapter as any).createMany) {
+      await (storageAdapter as any).createMany(newRecords)
+    } else {
+      // Fallback: criar um por um
+      for (const rec of newRecords) {
+        await storageAdapter.create(rec)
+      }
+    }
+    await refresh()
+  }
+
+  return {
+    records,
+    filtered,
+    loading,
+    searchTerm,
+    storageInfo,
+    setSearchTerm,
+    createRecord,
+    updateRecord,
+    deleteRecord,
+    importRecords,
+    refresh,
+  }
 }

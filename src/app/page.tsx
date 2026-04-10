@@ -13,7 +13,7 @@ type Modal = { type: 'none' } | { type: 'create' } | { type: 'edit'; record: Ter
 export default function Home() {
   const {
     records, filtered, loading, searchTerm, storageInfo,
-    setSearchTerm, createRecord, updateRecord, deleteRecord,
+    setSearchTerm, createRecord, updateRecord, deleteRecord, importRecords,
   } = useTermografia()
 
   const [modal, setModal] = useState<Modal>({ type: 'none' })
@@ -21,6 +21,10 @@ export default function Home() {
   const handleDelete = async (r: TermografiaRecord) => {
     if (!confirm(`Excluir registro de "${r.empresa}"?`)) return
     await deleteRecord(r.id)
+  }
+
+  const handleImport = async (newRecords: TermografiaRecord[]) => {
+    await importRecords(newRecords)
   }
 
   return (
@@ -55,12 +59,14 @@ export default function Home() {
         ) : (
           <RecordsTable
             records={filtered}
+            allRecords={records}          // ← passa todos os registros para exportação
             total={records.length}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             onView={(r) => setModal({ type: 'view', record: r })}
             onEdit={(r) => setModal({ type: 'edit', record: r })}
             onDelete={handleDelete}
+            onImport={handleImport}        // ← passa o callback de importação
           />
         )}
       </main>
