@@ -64,7 +64,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
     // Aplica uppercase para todos os campos de texto
     const upperFields: (keyof TermografiaFormData)[] = [
       'empresa', 'setor', 'tag', 'equipamento', 
-      'termograma', 'foto', 'descricao'
+      'termograma', 'descricao'
     ]
     const finalValue = upperFields.includes(field) ? value.toUpperCase() : value
     setForm((prev) => ({ ...prev, [field]: finalValue }))
@@ -78,6 +78,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
 
   const handleSubmit = async () => {
     if (!form.empresa.trim()) { alert('Informe o nome da empresa.'); return }
+    if (!form.termograma.trim()) { alert('Informe o termograma.'); return }
     setSaving(true)
     try {
       await onSave(form)
@@ -101,12 +102,12 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-1">×</button>
         </div>
 
-        <div className="p-4 grid grid-cols-2 gap-3">
+        <div className="p-4 flex flex-col gap-3">
           {/* Empresa */}
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Empresa *</label>
             <input
-              className="input"
+              className="input w-full"
               value={form.empresa}
               onChange={(e) => setField('empresa', e.target.value)}
               placeholder="Nome da empresa"
@@ -117,7 +118,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
             <label className="text-xs text-gray-500 font-medium">Data</label>
             <input
               type="date"
-              className="input"
+              className="input w-full"
               value={dateValue}
               onChange={handleDateChange}
             />
@@ -126,7 +127,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Setor</label>
             <input
-              className="input"
+              className="input w-full"
               value={form.setor}
               onChange={(e) => setField('setor', e.target.value)}
               placeholder="Setor/área"
@@ -136,7 +137,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Tag</label>
             <input
-              className="input"
+              className="input w-full"
               value={form.tag}
               onChange={(e) => setField('tag', e.target.value)}
               placeholder="TAG do ativo"
@@ -146,7 +147,7 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Equipamento</label>
             <input
-              className="input"
+              className="input w-full"
               value={form.equipamento}
               onChange={(e) => setField('equipamento', e.target.value)}
               placeholder="Nome do equipamento"
@@ -154,27 +155,17 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-500 font-medium">Termograma</label>
+            <label className="text-xs text-gray-500 font-medium">Termograma *</label>
             <input
-              className="input"
+              className="input w-full"
               value={form.termograma}
               onChange={(e) => setField('termograma', e.target.value)}
               placeholder="Nº ou referência"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-500 font-medium">Referência da foto</label>
-            <input
-              className="input"
-              value={form.foto}
-              onChange={(e) => setField('foto', e.target.value)}
-              placeholder="Ref. foto"
-            />
-          </div>
-
           {/* Fase */}
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Fase</label>
             <div className="flex gap-2">
               {(['R', 'S', 'T'] as Fase[]).map((f) => (
@@ -190,10 +181,10 @@ export default function RecordForm({ record, onSave, onClose }: RecordFormProps)
           </div>
 
           {/* Descrição */}
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <label className="text-xs text-gray-500 font-medium">Descrição da falha</label>
             <textarea
-              className="input resize-y min-h-[72px]"
+              className="input resize-y min-h-[72px] w-full"
               value={form.descricao}
               onChange={(e) => setField('descricao', e.target.value)}
               placeholder="Descreva a falha identificada..."
